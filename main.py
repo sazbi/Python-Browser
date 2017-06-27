@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtCore import *
-from PyQt5.QtWebKitWidgets import *
+from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QTabBar,
                              QFrame, QStackedLayout)
@@ -36,6 +36,7 @@ class App(QFrame):
 
 
         self.tabbar.setCurrentIndex(0)
+        self.tabbar.setDrawBase(False)
 
         #Keeping track of Tabs
         self.tabCount = 0
@@ -51,7 +52,19 @@ class App(QFrame):
 
         self.AddTabButton.clicked.connect(self.AddTab)
 
+        self.BackButton = QPushButton("<-")
+        self.BackButton.clicked.connect(self.GoBack)
+
+        self.ForwardButton = QPushButton("->")
+        self.ForwardButton.clicked.connect(self.GoForward)
+
+        self.ReloadButton = QPushButton("R")
+        self.ReloadButton.clicked.connect(self.ReloadPage)
+
         self.Toolbar.setLayout(self.ToolbarLayout)
+        self.ToolbarLayout.addWidget(self.BackButton)
+        self.ToolbarLayout.addWidget(self.ForwardButton)
+        self.ToolbarLayout.addWidget(self.ReloadButton)
         self.ToolbarLayout.addWidget(self.addressbar)
         self.ToolbarLayout.addWidget(self.AddTabButton)
 
@@ -82,11 +95,11 @@ class App(QFrame):
         self.tabs[i].setObjectName("tab" + str(i))
 
         #Open Webview
-        self.tabs[i].content = QWebView()
+        self.tabs[i].content = QWebEngineView()
         self.tabs[i].content.load(QUrl.fromUserInput("http://google.com"))
 
         #Set Tab names
-        self.tabs[i].content.titleChanged.connect(lambda: self.SetTabText(i, "title"))
+        self.tabs[i].content.titleChanged.connect(lambda: self.SetTabContent(i, "title"))
         self.tabs[i].content.iconChanged.connect(lambda: self.SetTabContent(i, "icon"))
 
         #add webview to tabs layout
@@ -157,6 +170,26 @@ class App(QFrame):
                 running = False
             else:
                 count += 1
+    def GoBack(self):
+        activeIndex = self.tabbar.currentIndex()
+        tab_name = self.tabbar.tabData(activeIndex)["object"]
+        tab_content = self.findChild(QWidget, tab_name).content
+
+        tab_content.back()
+
+    def GoForward(self):
+        activeIndex = self.tabbar.currentIndex()
+        tab_name = self.tabbar.tabData(activeIndex)["object"]
+        tab_content = self.findChild(QWidget, tab_name).content
+
+        tab_content.forward()
+
+    def ReloadPage(self):
+        activeIndex = self.tabbar.currentIndex()
+        tab_name = self.tabbar.tabData(activeIndex)["object"]
+        tab_content = self.findChild(QWidget, tab_name).content
+
+        tab_content.reload()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
