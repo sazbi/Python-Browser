@@ -1,13 +1,10 @@
-import os
 import sys
-import json
 
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QLabel, QLineEdit, QTabBar,
-                             QFrame, QStackedLayout)
-from PyQt5.QtGui import QIcon, QWindow, QImage
 from PyQt5.QtCore import *
 from PyQt5.QtWebKitWidgets import *
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
+                             QPushButton, QLineEdit, QTabBar,
+                             QFrame, QStackedLayout)
 
 
 class AddressBar(QLineEdit):
@@ -89,7 +86,8 @@ class App(QFrame):
         self.tabs[i].content.load(QUrl.fromUserInput("http://google.com"))
 
         #Set Tab names
-        self.tabs[i].content.titleChanged.connect(lambda: self.SetTabText(i))
+        self.tabs[i].content.titleChanged.connect(lambda: self.SetTabText(i, "title"))
+        self.tabs[i].content.iconChanged.connect(lambda: self.SetTabContent(i, "icon"))
 
         #add webview to tabs layout
         self.tabs[i].layout.addWidget(self.tabs[i].content)
@@ -119,7 +117,7 @@ class App(QFrame):
         text = self.addressbar.text()
 
         i = self.tabbar.currentIndex()
-        tab = self.tabbar.tabData(i)
+        tab = self.tabbar.tabData(i)["object"]
         wv = self.findChild(QWidget, tab).content
 
         if "http" not in text:
@@ -132,7 +130,7 @@ class App(QFrame):
 
         wv.load(QUrl.fromUserInput(url))
 
-    def SetTabText(self, i):
+    def SetTabContent(self, i, type):
         '''
             self.tabs[i].objectName = tab1
             self.tabbar.tabData(i)["object"] = tab1
@@ -150,8 +148,12 @@ class App(QFrame):
                 running = False
 
             if tab_name == tab_data_name["object"]:
-                new_title = self.findChild(QWidget, tab_name).content.title()
-                self.tabbar.setTabText(count, new_title)
+                if type == "title":
+                    new_title = self.findChild(QWidget, tab_name).content.title()
+                    self.tabbar.setTabText(count, new_title)
+                elif type == "icon":
+                    newIcon = self.findChild(QWidget, tab_name).content.icon()
+                    self.tabbar.setTabIcon(count, newIcon)
                 running = False
             else:
                 count += 1
