@@ -122,7 +122,7 @@ class App(QFrame):
         self.tabCount += 1
 
     def SwitchTab(self, i):
-        tab_data = self.tabbar.tabData(i)
+        tab_data = self.tabbar.tabData(i)["object"]
         tab_content = self.findChild(QWidget, tab_data)
         self.container.layout.setCurrentWidget(tab_content)
 
